@@ -18,4 +18,19 @@ class Client extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function inquiries()
+    {
+        return $this->hasMany(Inquiry::class);
+    }
+
+    public function leases()
+    {
+        return $this->hasMany(Lease::class);
+    }
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class);
+    }
 }
