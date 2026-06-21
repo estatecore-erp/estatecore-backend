@@ -1,20 +1,51 @@
 # EstateCore API Documentation
 
 ## Base URL
-http://127.0.0.1:8000/api/v1
+`http://127.0.0.1:8000/api/v1`
 
 ## Authentication
 EstateCore uses Laravel Sanctum token-based authentication.
 
 After login, include token in every request header:
+```
 Authorization: Bearer YOUR_TOKEN_HERE
+```
+
 
 ## Roles
-| Role  | Description |
-|-------|-------------|
-| admin | Full access to all modules |
-| agent | Manage own properties, view clients |
-| client | View properties, submit inquiries |
+| Role   | Description                              |
+|--------|------------------------------------------|
+| admin  | Full access to all modules               |
+| agent  | Manage own properties, view clients      |
+| client | View properties, submit inquiries        |
+
+
+## Folder Structure
+```
+app/
+├── Helpers/
+│   └── ApiResponse.php
+├── Http/
+│   ├── Controllers/Api/V1/
+│   ├── Requests/
+│   │   ├── Auth/
+│   │   └── Property/
+│   └── Resources/
+├── Models/
+└── Services/
+```
+
+
+## Development Pattern
+Follow this pattern for every module:
+```
+1. Request     → validate input
+2. Service     → business logic
+3. Resource    → shape response
+4. Controller  → handle request
+5. Routes      → register endpoint
+```
+
 
 ## Response Format
 All responses follow this structure:
@@ -27,10 +58,13 @@ All responses follow this structure:
 }
 ```
 
-# Auth Module
+
+# 1. Auth Module
 
 ## Register Client
+```
 POST /auth/register
+```
 **Access:** Public
 
 **Request:**
@@ -65,8 +99,11 @@ POST /auth/register
 }
 ```
 
+
 ## Register Agent
+```
 POST /auth/register-agent
+```
 **Access:** Admin only
 
 **Request:**
@@ -99,8 +136,11 @@ POST /auth/register-agent
 }
 ```
 
+
 ## Login
+```
 POST /auth/login
+```
 **Access:** Public
 
 **Request:**
@@ -129,12 +169,17 @@ POST /auth/login
 }
 ```
 
+
 ## Me (Current User)
+```
 GET /auth/me
+```
 **Access:** Authenticated
 
 **Headers:**
+```
 Authorization: Bearer YOUR_TOKEN
+```
 
 **Response:**
 ```json
@@ -152,12 +197,17 @@ Authorization: Bearer YOUR_TOKEN
 }
 ```
 
+
 ## Logout
+```
 POST /auth/logout
+```
 **Access:** Authenticated
 
 **Headers:**
+```
 Authorization: Bearer YOUR_TOKEN
+```
 
 **Response:**
 ```json
@@ -169,10 +219,13 @@ Authorization: Bearer YOUR_TOKEN
 }
 ```
 
-# Properties Module
+
+# 2. Properties Module
 
 ## Get All Properties
+```
 GET /properties
+```
 **Access:** Authenticated
 - Admin/Agent → all properties
 - Client → available only
@@ -202,12 +255,18 @@ GET /properties
 }
 ```
 
+
 ## Get Single Property
+```
 GET /properties/{id}
+```
 **Access:** Authenticated
 
+
 ## Create Property
+```
 POST /properties
+```
 **Access:** Admin, Agent
 
 **Request (agent):**
@@ -233,8 +292,11 @@ POST /properties
 }
 ```
 
+
 ## Update Property
+```
 PUT /properties/{id}
+```
 **Access:** Admin, Agent
 
 **Request:**
@@ -245,6 +307,90 @@ PUT /properties/{id}
 }
 ```
 
+
 ## Delete Property
+```
 DELETE /properties/{id}
+```
 **Access:** Admin only
+
+
+# 3. Employees Module
+
+## Get All Employees
+```
+GET /employees
+```
+**Access:** Admin only
+
+
+## Get Single Employee
+```
+GET /employees/{id}
+```
+**Access:** Admin only
+
+
+## Update Employee
+```
+PUT /employees/{id}
+```
+**Access:** Admin only
+
+**Request:**
+```json
+{
+    "phone": "0771234567"
+}
+```
+
+
+## Delete Employee
+```
+DELETE /employees/{id}
+```
+**Access:** Admin only
+
+> Note: Employees are created via POST /auth/register-agent
+
+
+
+# 4. Clients Module
+
+## Get All Clients
+```
+GET /clients
+```
+**Access:** Admin, Agent
+
+
+## Get Single Client
+```
+GET /clients/{id}
+```
+**Access:** Admin, Agent
+
+
+## Update Client
+```
+PUT /clients/{id}
+```
+**Access:** Admin only
+
+**Request:**
+```json
+{
+    "phone": "0771234567",
+    "address": "456 New St"
+}
+```
+
+
+## Delete Client
+```
+DELETE /clients/{id}
+```
+**Access:** Admin only
+
+> Note: Clients are created via POST /auth/register
+
