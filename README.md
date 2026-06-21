@@ -48,6 +48,10 @@ php artisan migrate
 php artisan serve
 ```
 
+## Documentation
+
+- [API Documentation](DOCUMENTATION.md)
+
 ## Contact
 
 [![Email](https://skillicons.dev/icons?i=gmail)](mailto:dev.sasmitha@gmail.com)
