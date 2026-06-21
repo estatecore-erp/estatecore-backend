@@ -14,8 +14,8 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
-            'address' => $this->when($this->role === 'client', $this->address),
-            'hire_date' => $this->when($this->role === 'agent', $this->hire_date),
+            'address' => $this->when($this->role === 'client', $this->client?->address),
+            'hire_date' => $this->when($this->role === 'agent', $this->employee?->hire_date),
             'role' => $this->role,
             'created_at' => $this->created_at?->toDateTimeString(),
         ];
