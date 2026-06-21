@@ -29,18 +29,18 @@ class Property extends Model
         return $this->belongsTo(User::class, 'agent_id');
     }
 
-    // public function inquiries()
-    // {
-    //     return $this->hasMany(Inquiry::class);
-    // }
+    public function inquiries()
+    {
+        return $this->hasMany(Inquiry::class);
+    }
 
-    // public function lease()
-    // {
-    //     return $this->hasOne(Lease::class);
-    // }
+    public function lease()
+    {
+        return $this->hasOne(Lease::class);
+    }
 
-    // public function sale()
-    // {
-    //     return $this->hasOne(Sale::class);
-    // }
+    public function sale()
+    {
+        return $this->hasOne(Sale::class);
+    }
 }
