@@ -15,10 +15,6 @@ class EmployeeController extends Controller
 
     public function index(Request $request)
     {
-        if ($request->user()->role !== 'admin') {
-            return ApiResponse::error('Unauthorized', null, 403);
-        }
-        
         $employees = $this->employeeService->getAll();
         return ApiResponse::success(
             EmployeeResource::collection($employees),
@@ -28,10 +24,6 @@ class EmployeeController extends Controller
 
     public function show(Request $request, int $id)
     {
-        if ($request->user()->role !== 'admin') {
-            return ApiResponse::error('Unauthorized', null, 403);
-        }
-        
         $employee = $this->employeeService->getById($id);
         return ApiResponse::success(
             new EmployeeResource($employee),
@@ -42,6 +34,7 @@ class EmployeeController extends Controller
     public function update(UpdateEmployeeRequest $request, int $id)
     {
         $employee = $this->employeeService->updateEmployee($id, $request->validated());
+
         return ApiResponse::success(
             new EmployeeResource($employee),
             'Employee updated successfully'
@@ -50,10 +43,6 @@ class EmployeeController extends Controller
 
     public function destroy(Request $request, int $id)
     {
-        if ($request->user()->role !== 'admin') {
-            return ApiResponse::error('Unauthorized', null, 403);
-        }
-        
         $this->employeeService->deleteEmployee($id);
         return ApiResponse::success(
             null,

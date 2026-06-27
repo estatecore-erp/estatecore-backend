@@ -19,7 +19,14 @@ class EmployeeService
     public function updateEmployee(int $id, array $data): Employee
     {
         $employee = Employee::findOrFail($id);
-        $employee->update($data);
+        $user = $employee->user;
+
+        // update users table
+        $user->update([
+            'name'  => $request->name  ?? $user->name,
+            'phone' => $request->phone ?? $user->phone,
+        ]);
+
         return $employee->fresh('user');
     }
 

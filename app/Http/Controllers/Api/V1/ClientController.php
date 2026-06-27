@@ -15,10 +15,6 @@ class ClientController extends Controller
 
     public function index(Request $request)
     {
-        if (!in_array($request->user()->role, ['admin', 'agent'])) {
-            return ApiResponse::error('Unauthorized', null, 403);
-        }
-        
         $clients = $this->clientService->getAll();
         return ApiResponse::success(
             ClientResource::collection($clients),
@@ -28,10 +24,15 @@ class ClientController extends Controller
 
     public function show(Request $request, int $id)
     {
-        if (!in_array($request->user()->role, ['admin', 'agent'])) {
+        $user = $request->user();
+
+        $canAccess = in_array($user->role, ['admin', 'agent'])
+            || ($user->role === 'client' && $user->client_id === $id);
+
+        if (!$canAccess) {
             return ApiResponse::error('Unauthorized', null, 403);
         }
-        
+
         $client = $this->clientService->getById($id);
         return ApiResponse::success(
             new ClientResource($client),
@@ -41,7 +42,17 @@ class ClientController extends Controller
 
     public function update(UpdateClientRequest $request, int $id)
     {
+        $user = $request->user();
+
+        $canUpdate = ($user->role === 'admin')
+            || ($user->role === 'client' && $user->client_id === $id);
+
+        if (!$canUpdate) {
+            return ApiResponse::error('Unauthorized', null, 403);
+        }
+
         $client = $this->clientService->updateClient($id, $request->validated());
+
         return ApiResponse::success(
             new ClientResource($client),
             'Client updated successfully'
@@ -50,10 +61,19 @@ class ClientController extends Controller
 
     public function destroy(Request $request, int $id)
     {
-        if ($request->user()->role !== 'admin') {
-            return ApiResponse::error('Unauthorized', null, 403);
+        $user = $request->user();
+
+        $canDelete = ($user->role === 'admin')
+            || ($user->role === 'client' && $user->client_id === $id);
+
+        if (!$canDelete) {
+            return ApiResponse::error(
+                'Unauthorized',
+                null,
+                403
+            );
         }
-        
+
         $this->clientService->deleteClient($id);
         return ApiResponse::success(
             null,

@@ -16,7 +16,7 @@ Route::prefix('/v1')->group(function () {
             Route::middleware('auth:sanctum')->group(function () {
                 Route::get('/me', 'me');
                 Route::post('/logout', 'logout');
-                Route::post('/register-agent', 'registerAgent');
+                Route::post('/register-agent', 'registerAgent')->middleware('role:admin');
             });
         });
     });
@@ -25,23 +25,26 @@ Route::prefix('/v1')->group(function () {
         // properties
         Route::prefix('properties')->controller(PropertyController::class)->group(function () {
             Route::get('/', 'index');
-            Route::post('/', 'store');
+            Route::post('/', 'store')->middleware('role:admin,agent');
             Route::get('/{id}', 'show');
             Route::put('/{id}', 'update');
             Route::delete('/{id}', 'destroy');
         });
 
-        // employees (admin only)
+        // employees
         Route::prefix('employees')->controller(EmployeeController::class)->group(function () {
             Route::get('/', 'index');
             Route::get('/{id}', 'show');
-            Route::put('/{id}', 'update');
-            Route::delete('/{id}', 'destroy');
+
+            Route::middleware('role:admin')->group(function () {
+                Route::put('/{id}', 'update');
+                Route::delete('/{id}', 'destroy');
+            });
         });
 
         // clients
         Route::prefix('clients')->controller(ClientController::class)->group(function () {
-            Route::get('/', 'index');
+            Route::get('/', 'index')->middleware('role:admin,agent');
             Route::get('/{id}', 'show');
             Route::put('/{id}', 'update');
             Route::delete('/{id}', 'destroy');

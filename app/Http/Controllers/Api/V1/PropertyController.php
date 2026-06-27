@@ -47,15 +47,43 @@ class PropertyController extends Controller
 
     public function update(UpdatePropertyRequest $request, int $id)
     {
-        $property = $this->propertyService->updateProperty($id, $request->validated());
+        $user = $request->user();
+        $property = $this->propertyService->getById($id);
+
+        $canUpdate = ($user->role === 'admin') ||
+            ($user->role === 'agent' && $property->agent_id === $user->id);
+
+        if (!$canUpdate) {
+            return ApiResponse::error(
+                'You do not have permission to edit this property',
+                null,
+                403
+            );
+        }
+
+        $updatedProperty = $this->propertyService->updateProperty($id, $request->validated());
         return ApiResponse::success(
-            new PropertyResource($property),
+            new PropertyResource($updatedProperty),
             'Property updated successfully'
         );
     }
 
-    public function destroy(int $id)
+    public function destroy(Request $request, int $id)
     {
+        $user = $request->user();
+        $property = $this->propertyService->getById($id);
+
+        $canDelete = ($user->role === 'admin') ||
+            ($user->role === 'agent' && $property->agent_id === $user->id);
+
+        if (!$canDelete) {
+            return ApiResponse::error(
+                'You do not have permission to delete this property',
+                null,
+                403
+            );
+        }
+
         $this->propertyService->deleteProperty($id);
         return ApiResponse::success(
             null,

@@ -14,14 +14,16 @@ class UpdateEmployeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'hire_date' => 'sometimes|date',
+            'name' => 'sometimes|string|max:255',
+            'phone' => 'sometimes|string'
         ];
     }
 
     public function messages(): array
     {
         return [
-            'hire_date.date' => 'Hire date must be a valid date',
+            'name.string' => 'Name must be a string',
+            'phone.string' => 'Phone must be a string',
         ];
     }
 }

@@ -19,7 +19,19 @@ class ClientService
     public function updateClient(int $id, array $data): Client
     {
         $client = Client::findOrFail($id);
-        $client->update($data);
+        $user = $client->user;
+
+        // update users table
+        $user->update([
+            'name'  => $request->name  ?? $user->name,
+            'phone' => $request->phone ?? $user->phone,
+        ]);
+
+        // update clients table
+        $client->update([
+            'address' => $data['address'] ?? $client->address,
+        ]);
+
         return $client->fresh('user');
     }
 
