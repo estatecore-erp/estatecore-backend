@@ -27,7 +27,7 @@ class ClientController extends Controller
         $user = $request->user();
 
         $canAccess = in_array($user->role, ['admin', 'agent'])
-            || ($user->role === 'client' && $user->client_id === $id);
+            || ($user->role === 'client' && $user->client?->id === $id);
 
         if (!$canAccess) {
             return ApiResponse::error('Unauthorized', null, 403);
@@ -45,7 +45,7 @@ class ClientController extends Controller
         $user = $request->user();
 
         $canUpdate = ($user->role === 'admin')
-            || ($user->role === 'client' && $user->client_id === $id);
+            || ($user->role === 'client' && $user->client?->id === $id);
 
         if (!$canUpdate) {
             return ApiResponse::error('Unauthorized', null, 403);
@@ -59,21 +59,8 @@ class ClientController extends Controller
         );
     }
 
-    public function destroy(Request $request, int $id)
+    public function destroy(int $id)
     {
-        $user = $request->user();
-
-        $canDelete = ($user->role === 'admin')
-            || ($user->role === 'client' && $user->client_id === $id);
-
-        if (!$canDelete) {
-            return ApiResponse::error(
-                'Unauthorized',
-                null,
-                403
-            );
-        }
-
         $this->clientService->deleteClient($id);
         return ApiResponse::success(
             null,

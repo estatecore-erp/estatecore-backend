@@ -25,7 +25,7 @@ class PropertyService
 
     public function storeProperty(array $data, User $authUser)
     {
-        return Property::create([
+        $property = Property::create([
             'agent_id' => $authUser->role === 'admin'
                 ? $data['agent_id']
                 : $authUser->id,
@@ -36,6 +36,8 @@ class PropertyService
             'price' => $data['price'],
             'location' => $data['location'],
         ]);
+
+        return $property->load('agent');
     }
 
     public function updateProperty(int $id, array $data): Property
