@@ -16,14 +16,11 @@ class InquiryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'client_name' => $this->client->name, // User ගේ නම
-            'property' => [
-                'id' => $this->property->id,
-                'title' => $this->property->title,
-            ],
+            'client' => new ClientResource($this->whenLoaded('client')),
+            'property' => new PropertyResource($this->whenLoaded('property')),  
             'status' => $this->status,
             'message' => $this->message,
-            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at?->toDateTimeString(),
         ];
     }
 }
