@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Lease;
+use App\Models\Property;
+use Illuminate\Support\Facades\Auth;
+
+class LeaseService
+{
+    public function getAll()
+    {
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            return Lease::with(['client.user', 'property.agent'])
+                ->latest()->get();
+        }
+
+        if ($user->role === 'agent') {
+            return Lease::with(['client.user', 'property.agent'])
+                ->whereHas(
+                    'property',
+                    fn($q) =>
+                    $q->where('agent_id', $user->id)
+                )
+                ->latest()->get();
+        }
+
+        return Lease::with(['client.user', 'property.agent'])
+            ->where('client_id', $user->client->id)
+            ->latest()->get();
+    }
+
+    public function getById(int $id)
+    {
+        return Lease::with(['client.user', 'property.agent'])
+            ->findOrFail($id);
+    }
+
+    public function store(array $data): Lease
+    {
+        $lease = Lease::create([
+            'client_id' => $data['client_id'],
+            'property_id' => $data['property_id'],
+            'start_date' => $data['start_date'],
+            'end_date' => $data['end_date'],
+            'monthly_rent' => $data['monthly_rent'],
+            'status' => 'active',
+        ]);
+
+        // property no longer available
+        Property::query()->where('id', $data['property_id'])
+            ->update(['status' => 'rented']);
+
+        return $lease->load(['client.user', 'property.agent']);
+    }
+
+    public function update(int $id, array $data): Lease
+    {
+        $lease = Lease::findOrFail($id);
+        $lease->update($data);
+
+        // revert property if lease expired
+        if ($data['status'] === 'expired') {
+            Property::query()->where('id', $lease->property_id)
+                ->update(['status' => 'available']);
+        }
+
+        return $lease->fresh(['client.user', 'property.agent']);
+    }
+
+    public function delete(int $id): void
+    {
+        $lease = Lease::findOrFail($id);
+
+        // revert property when lease deleted
+        Property::query()->where('id', $lease->property_id)
+            ->update(['status' => 'available']);
+
+        $lease->delete();
+    }
+}

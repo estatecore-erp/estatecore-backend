@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\EmployeeController;
 use App\Http\Controllers\Api\V1\InquiryController;
+use App\Http\Controllers\Api\V1\LeaseController;
 use App\Http\Controllers\Api\V1\PropertyController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,15 @@ Route::prefix('/v1')->group(function () {
             Route::get('/{id}', 'show');
             Route::post('/', 'store')->middleware('role:client');
             Route::put('/{id}', 'update')->middleware('role:admin,agent');
+            Route::delete('/{id}', 'destroy')->middleware('role:admin');
+        });
+
+        // leases
+        Route::prefix('leases')->controller(LeaseController::class)->group(function () {
+            Route::get('/', 'index');
+            Route::get('/{id}', 'show');
+            Route::post('/', 'store')->middleware('role:admin,agent');
+            Route::put('/{id}', 'update')->middleware('role:admin');
             Route::delete('/{id}', 'destroy')->middleware('role:admin');
         });
     });
