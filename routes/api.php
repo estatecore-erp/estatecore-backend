@@ -47,7 +47,7 @@ Route::prefix('/v1')->group(function () {
             Route::get('/', 'index')->middleware('role:admin,agent');
             Route::get('/{id}', 'show');
             Route::put('/{id}', 'update');
-            Route::delete('/{id}', 'destroy');
+            Route::delete('/{id}', 'destroy')->middleware('role:admin');
         });
     });
 });

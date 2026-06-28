@@ -23,8 +23,8 @@ class ClientService
 
         // update users table
         $user->update([
-            'name'  => $request->name  ?? $user->name,
-            'phone' => $request->phone ?? $user->phone,
+            'name' => $data['name']  ?? $user->name,
+            'phone' => $data['phone'] ?? $user->phone,
         ]);
 
         // update clients table
