@@ -29,6 +29,9 @@ app/
 │   ├── Controllers/Api/V1/
 │   ├── Requests/
 │   │   ├── Auth/
+│   │   ├── Client/
+│   │   ├── Employee/
+│   │   ├── Inquiry/
 │   │   └── Property/
 │   └── Resources/
 ├── Models/
@@ -204,11 +207,6 @@ POST /auth/logout
 ```
 **Access:** Authenticated
 
-**Headers:**
-```
-Authorization: Bearer YOUR_TOKEN
-```
-
 **Response:**
 ```json
 {
@@ -340,6 +338,7 @@ PUT /employees/{id}
 **Request:**
 ```json
 {
+    "name": "John Updated",
     "phone": "0771234567"
 }
 ```
@@ -352,7 +351,6 @@ DELETE /employees/{id}
 **Access:** Admin only
 
 > Note: Employees are created via POST /auth/register-agent
-
 
 
 # 4. Clients Module
@@ -368,18 +366,19 @@ GET /clients
 ```
 GET /clients/{id}
 ```
-**Access:** Admin, Agent
+**Access:** Admin, Agent, Client (own only)
 
 
 ## Update Client
 ```
 PUT /clients/{id}
 ```
-**Access:** Admin only
+**Access:** Admin, Client (own only)
 
 **Request:**
 ```json
 {
+    "name": "John Updated",
     "phone": "0771234567",
     "address": "456 New St"
 }
@@ -394,3 +393,127 @@ DELETE /clients/{id}
 
 > Note: Clients are created via POST /auth/register
 
+
+# 5. Inquiries Module
+
+## Get All Inquiries
+```
+GET /inquiries
+```
+**Access:**
+- Admin → all inquiries
+- Agent → inquiries on their properties
+- Client → own inquiries only
+
+**Response:**
+```json
+{
+    "success": true,
+    "message": "Inquiries retrieved successfully",
+    "data": [
+        {
+            "id": 1,
+            "property": {
+                "id": 1,
+                "title": "Modern Villa",
+                "location": "Colombo 07",
+                "status": "available"
+            },
+            "client": {
+                "id": 1,
+                "user": {
+                    "name": "John Client",
+                    "email": "john@gmail.com",
+                    "phone": "0771234567"
+                }
+            },
+            "message": "I am interested in this property",
+            "status": "pending",
+            "created_at": "2026-06-01 10:00:00"
+        }
+    ],
+    "errors": null
+}
+```
+
+
+## Get Single Inquiry
+```
+GET /inquiries/{id}
+```
+**Access:** Admin, Agent (own properties), Client (own only)
+
+
+## Create Inquiry
+```
+POST /inquiries
+```
+**Access:** Client only
+
+> Note: client_id is auto set from logged in user. Only available properties can be inquired.
+
+**Request:**
+```json
+{
+    "property_id": 1,
+    "message": "I am interested in this property"
+}
+```
+
+**Response:**
+```json
+{
+    "success": true,
+    "message": "Inquiry submitted successfully",
+    "data": {
+        "id": 1,
+        "property": {
+            "id": 1,
+            "title": "Modern Villa"
+        },
+        "client": {
+            "id": 1,
+            "user": {
+                "name": "John Client"
+            }
+        },
+        "message": "I am interested in this property",
+        "status": "pending",
+        "created_at": "2026-06-01 10:00:00"
+    },
+    "errors": null
+}
+```
+
+
+## Respond to Inquiry
+```
+PUT /inquiries/{id}
+```
+**Access:** Admin, Agent only
+
+**Request:**
+```json
+{
+    "status": "responded"
+}
+```
+
+
+## Delete Inquiry
+```
+DELETE /inquiries/{id}
+```
+**Access:** Admin only
+
+
+## Inquiry Status Flow
+```
+client submits inquiry → status: pending
+agent/admin responds   → status: responded
+```
+
+> Note: Inquiries do NOT change property status.
+> Only Leases and Sales change property status.
+
+> Note: Multiple clients can inquire on the same available property.
