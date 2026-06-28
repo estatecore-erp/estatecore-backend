@@ -3,20 +3,9 @@
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ClientController;
 use App\Http\Controllers\Api\V1\EmployeeController;
+use App\Http\Controllers\Api\V1\InquiryController;
 use App\Http\Controllers\Api\V1\PropertyController;
-use App\Http\Controllers\Api\InquiryController;
 use Illuminate\Support\Facades\Route;
-
-// Inquiry Routes
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::prefix('inquiries')->controller(InquiryController::class)->group(function () {
-        Route::get('/', 'index');
-        Route::post('/', 'store')->middleware('role:client');
-        Route::get('/{id}', 'show');
-        Route::put('/{id}', 'update')->middleware('role:admin,agent');
-        Route::delete('/{id}', 'destroy')->middleware('role:admin');
-    });
-});
 
 // V1 Routes
 Route::prefix('/v1')->group(function () {
@@ -60,6 +49,15 @@ Route::prefix('/v1')->group(function () {
             Route::get('/', 'index')->middleware('role:admin,agent');
             Route::get('/{id}', 'show');
             Route::put('/{id}', 'update');
+            Route::delete('/{id}', 'destroy')->middleware('role:admin');
+        });
+
+        // inquiries
+        Route::prefix('inquiries')->controller(InquiryController::class)->group(function () {
+            Route::get('/', 'index');
+            Route::get('/{id}', 'show');
+            Route::post('/', 'store')->middleware('role:client');
+            Route::put('/{id}', 'update')->middleware('role:admin,agent');
             Route::delete('/{id}', 'destroy')->middleware('role:admin');
         });
     });

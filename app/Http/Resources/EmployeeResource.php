@@ -11,9 +11,7 @@ class EmployeeResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user' => new UserResource($this->whenLoaded('user')),
-            'created_at' => $this->created_at?->toDateTimeString(),
-            'updated_at' => $this->updated_at?->toDateTimeString(),
+            'user' => new UserResource($this->whenLoaded('user'))
         ];
     }
 }
