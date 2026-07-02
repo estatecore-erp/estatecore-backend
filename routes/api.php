@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\InquiryController;
 use App\Http\Controllers\Api\V1\PropertyController;
 use App\Http\Controllers\Api\V1\LeaseController;
 use App\Http\Controllers\Api\V1\SaleController;
+use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 // V1 Routes
@@ -26,8 +27,15 @@ Route::prefix('/v1')->group(function () {
     });
 
     Route::middleware('auth:sanctum')->group(function () {
+
+        // users
+        Route::middleware('role:admin')->prefix('users')->controller(UserController::class)->group(function () {
+            Route::get('/', 'index');
+            Route::get('/{id}', 'show');
+        });
+
         // properties
-        Route::prefix('properties')->controller(PropertyController::class)->group(function () {
+        Route::middleware('role:admin')->prefix('properties')->controller(PropertyController::class)->group(function () {
             Route::get('/', 'index');
             Route::post('/', 'store')->middleware('role:admin,agent');
             Route::get('/{id}', 'show');
