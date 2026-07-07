@@ -17,6 +17,7 @@ class PropertyResource extends JsonResource
             'status' => $this->status,
             'price' => $this->price,
             'location' => $this->location,
+            'image_path' => $this->image_path,
             'agent' => new UserResource($this->whenLoaded('agent')),
             'created_at' => $this->created_at?->toDateTimeString(),
             'updated_at' => $this->updated_at?->toDateTimeString(),

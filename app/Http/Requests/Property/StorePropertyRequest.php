@@ -21,6 +21,7 @@ class StorePropertyRequest extends FormRequest
             'price' => 'required|numeric|min:0',
             'location' => 'required|string',
             'agent_id' => 'sometimes|exists:users,id',
+            'image_path' => 'nullable|string',
         ];
 
         if ($this->user()->role === 'admin') {

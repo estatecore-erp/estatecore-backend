@@ -35,6 +35,7 @@ class PropertyService
             'status' => 'available',
             'price' => $data['price'],
             'location' => $data['location'],
+            'image_path' => $data['image_path'] ?? null,
         ]);
 
         return $property->load('agent');
