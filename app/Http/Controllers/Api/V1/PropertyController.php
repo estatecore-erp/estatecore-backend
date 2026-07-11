@@ -16,7 +16,8 @@ class PropertyController extends Controller
 
     public function index(Request $request)
     {
-        $properties = $this->propertyService->getAll($request->user());
+        $filters = $request->only(['search', 'type', 'status']);
+        $properties = $this->propertyService->getAll($request->user(), $filters);
         return ApiResponse::success(
             PropertyResource::collection($properties),
             'Properties retrieved successfully'

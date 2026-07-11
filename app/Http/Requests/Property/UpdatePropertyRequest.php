@@ -21,7 +21,7 @@ class UpdatePropertyRequest extends FormRequest
             'status' => 'sometimes|in:available,sold,rented',
             'price' => 'sometimes|numeric|min:0',
             'location' => 'sometimes|string',
-            'image_path' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
         ];
     }
 
