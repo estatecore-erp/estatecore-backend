@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ClientController;
+use App\Http\Controllers\Api\V1\DashboardStatsController;
 use App\Http\Controllers\Api\V1\EmployeeController;
 use App\Http\Controllers\Api\V1\InquiryController;
 use App\Http\Controllers\Api\V1\PropertyController;
@@ -87,6 +88,11 @@ Route::prefix('/v1')->group(function () {
             Route::get('/{id}', 'show');
             Route::post('/', 'store')->middleware('role:admin,agent');
             Route::delete('/{id}', 'destroy')->middleware('role:admin');
+        });
+
+        // stats
+        Route::prefix('/dashboard')->controller(DashboardStatsController::class)->group(function () {
+            Route::get('/stats', 'stats')->middleware('role:admin,agent');
         });
     });
 });

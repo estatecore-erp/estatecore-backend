@@ -19,6 +19,10 @@ class PropertyService
             $query->where('status', 'available');
         }
 
+        if ($authUser->role === 'agent') {
+            $query->where('agent_id', $authUser->id);
+        }
+
         if (!empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
