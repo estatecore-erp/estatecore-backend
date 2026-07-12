@@ -30,9 +30,11 @@ Route::prefix('/v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
 
         // users
-        Route::middleware('role:admin')->prefix('users')->controller(UserController::class)->group(function () {
-            Route::get('/', 'index');
-            Route::get('/{id}', 'show');
+        Route::prefix('users')->controller(UserController::class)->group(function () {
+            Route::get('/', 'index')->middleware('role:admin,agent');
+            Route::get('/{id}', 'show')->middleware('role:admin,agent');
+            Route::put('/{id}', 'update')->middleware('role:admin');
+            Route::delete('/{id}', 'destroy')->middleware('role:admin');
         });
 
         // properties
