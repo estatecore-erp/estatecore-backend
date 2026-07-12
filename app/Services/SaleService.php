@@ -8,29 +8,31 @@ use Illuminate\Support\Facades\Auth;
 
 class SaleService
 {
-    public function getAll()
+    public function getAll(array $filters = [])
     {
         $user = Auth::user();
-
-        if ($user->role === 'admin') {
-            return Sale::with(['client.user', 'property.agent'])
-                ->latest()->get();
-        }
+        $query = Sale::with(['client.user', 'property.agent']);
 
         if ($user->role === 'agent') {
-            return Sale::with(['client.user', 'property.agent'])
-                ->whereHas(
-                    'property',
-                    fn($q) =>
-                    $q->where('agent_id', $user->id)
-                )
-                ->latest()->get();
+            $query->whereHas('property', fn($q) => $q->where('agent_id', $user->id));
+        } elseif ($user->role === 'client') {
+            $query->where('client_id', $user->client->id);
+        }
+        // admin: no extra scope
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('client.user', fn($qq) => $qq->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('property', fn($qq) => $qq->where('title', 'like', "%{$search}%"));
+            });
         }
 
-        // client sees own sales only
-        return Sale::with(['client.user', 'property.agent'])
-            ->where('client_id', $user->client->id)
-            ->latest()->get();
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            $query->whereHas('property', fn($q) => $q->where('status', $filters['status']));
+        }
+
+        return $query->latest()->paginate(10);
     }
 
     public function getById(int $id)

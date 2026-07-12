@@ -2,11 +2,13 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ClientController;
+use App\Http\Controllers\Api\V1\DashboardStatsController;
 use App\Http\Controllers\Api\V1\EmployeeController;
 use App\Http\Controllers\Api\V1\InquiryController;
 use App\Http\Controllers\Api\V1\PropertyController;
 use App\Http\Controllers\Api\V1\LeaseController;
 use App\Http\Controllers\Api\V1\SaleController;
+use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 // V1 Routes
@@ -26,9 +28,19 @@ Route::prefix('/v1')->group(function () {
     });
 
     Route::middleware('auth:sanctum')->group(function () {
+
+        // users
+        Route::prefix('users')->controller(UserController::class)->group(function () {
+            Route::get('/', 'index')->middleware('role:admin,agent');
+            Route::get('/{id}', 'show')->middleware('role:admin,agent');
+            Route::put('/{id}', 'update')->middleware('role:admin');
+            Route::delete('/{id}', 'destroy')->middleware('role:admin');
+        });
+
         // properties
         Route::prefix('properties')->controller(PropertyController::class)->group(function () {
             Route::get('/', 'index');
+            Route::get('/portfolio', 'portfolio')->middleware('role:client');
             Route::post('/', 'store')->middleware('role:admin,agent');
             Route::get('/{id}', 'show');
             Route::put('/{id}', 'update');
@@ -78,6 +90,11 @@ Route::prefix('/v1')->group(function () {
             Route::get('/{id}', 'show');
             Route::post('/', 'store')->middleware('role:admin,agent');
             Route::delete('/{id}', 'destroy')->middleware('role:admin');
+        });
+
+        // stats
+        Route::prefix('/dashboard')->controller(DashboardStatsController::class)->group(function () {
+            Route::get('/stats', 'stats')->middleware('role:admin,agent');
         });
     });
 });

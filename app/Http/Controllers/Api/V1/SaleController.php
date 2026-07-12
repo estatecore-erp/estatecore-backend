@@ -7,14 +7,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Sale\StoreSaleRequest;
 use App\Http\Resources\SaleResource;
 use App\Services\SaleService;
+use Illuminate\Http\Request;
 
 class SaleController extends Controller
 {
     public function __construct(private SaleService $saleService) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $sales = $this->saleService->getAll();
+        $sales = $this->saleService->getAll(
+            $request->only(['search', 'status'])
+        );
         return ApiResponse::success(
             SaleResource::collection($sales),
             'Sales retrieved successfully'

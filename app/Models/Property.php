@@ -17,6 +17,7 @@ class Property extends Model
         'status',
         'price',
         'location',
+        'image_path'
     ];
 
     protected $casts = [

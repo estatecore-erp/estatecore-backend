@@ -24,11 +24,12 @@ class InquiryResource extends JsonResource
                     'email' => $this->property->agent->email,
                 ] : null,
             ],
-            'client' => [
+            'client' => $this->client && $this->client->user ? [
                 'id' => $this->client->user->id,
                 'name' => $this->client->user->name,
                 'email' => $this->client->user->email,
-            ],
+                'phone' => $this->client->user->phone ?? null,
+            ] : null,
             'message' => $this->message,
             'status' => $this->status,
             'created_at' => $this->created_at?->toDateTimeString(),

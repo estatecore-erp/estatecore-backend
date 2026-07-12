@@ -16,7 +16,8 @@ class PropertyController extends Controller
 
     public function index(Request $request)
     {
-        $properties = $this->propertyService->getAll($request->user());
+        $filters = $request->only(['search', 'type', 'status']);
+        $properties = $this->propertyService->getAll($request->user(), $filters);
         return ApiResponse::success(
             PropertyResource::collection($properties),
             'Properties retrieved successfully'
@@ -88,6 +89,16 @@ class PropertyController extends Controller
         return ApiResponse::success(
             null,
             'Property deleted successfully'
+        );
+    }
+
+    public function portfolio(Request $request)
+    {
+        $properties = $this->propertyService->getClientPortfolio($request->user());
+
+        return ApiResponse::success(
+            PropertyResource::collection($properties),
+            'Portfolio retrieved successfully'
         );
     }
 }
