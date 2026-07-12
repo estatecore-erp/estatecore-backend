@@ -8,14 +8,19 @@ use App\Http\Requests\Inquiry\StoreInquiryRequest;
 use App\Http\Requests\Inquiry\UpdateInquiryRequest;
 use App\Http\Resources\InquiryResource;
 use App\Services\InquiryService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class InquiryController extends Controller
 {
     public function __construct(private InquiryService $inquiryService) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        $inquiries = $this->inquiryService->getAll();
+        $inquiries = $this->inquiryService->getAll(
+            $request->only(['search', 'status'])
+        );
+
         return ApiResponse::success(
             InquiryResource::collection($inquiries),
             'Inquiries retrieved successfully'
@@ -52,6 +57,10 @@ class InquiryController extends Controller
 
     public function destroy(int $id)
     {
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Only admins can delete inquiries.');
+        }
+
         $this->inquiryService->delete($id);
         return ApiResponse::success(
             null,

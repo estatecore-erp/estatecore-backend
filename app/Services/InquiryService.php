@@ -7,34 +7,33 @@ use Illuminate\Support\Facades\Auth;
 
 class InquiryService
 {
-    // get inquiries based on role
-    public function getAll()
+    // get inquiries based on role, with search/status/pagination
+    public function getAll(array $filters = [])
     {
         $user = Auth::user();
 
-        if ($user->role === 'admin') {
-            return Inquiry::with(['client.user', 'property.agent'])
-                ->latest()
-                ->get();
-        }
+        $query = Inquiry::with(['client.user', 'property.agent']);
 
         if ($user->role === 'agent') {
-            // only inquiries on agent's properties
-            return Inquiry::with(['client.user', 'property.agent'])
-                ->whereHas(
-                    'property',
-                    fn($q) =>
-                    $q->where('agent_id', $user->id)
-                )
-                ->latest()
-                ->get();
+            $query->whereHas('property', fn($q) => $q->where('agent_id', $user->id));
+        } elseif ($user->role === 'client') {
+            $query->where('client_id', $user->client->id);
+        }
+        // admin: no extra scope, sees everything
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('client.user', fn($qq) => $qq->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('property', fn($qq) => $qq->where('title', 'like', "%{$search}%"));
+            });
         }
 
-        // client sees own inquiries only
-        return Inquiry::with(['client.user', 'property.agent'])
-            ->where('client_id', $user->client->id)
-            ->latest()
-            ->get();
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->latest()->paginate(10);
     }
 
     // get single inquiry with role check
@@ -50,22 +49,16 @@ class InquiryService
         if ($user->role === 'agent') {
             return Inquiry::with(['client.user', 'property.agent'])
                 ->where('id', $id)
-                ->whereHas(
-                    'property',
-                    fn($q) =>
-                    $q->where('agent_id', $user->id)
-                )
+                ->whereHas('property', fn($q) => $q->where('agent_id', $user->id))
                 ->firstOrFail();
         }
 
-        // client can only view own inquiry
         return Inquiry::with(['client.user', 'property.agent'])
             ->where('id', $id)
             ->where('client_id', $user->client->id)
             ->firstOrFail();
     }
 
-    // client submits inquiry on a property
     public function store(array $data): Inquiry
     {
         $inquiry = Inquiry::create([
@@ -78,7 +71,6 @@ class InquiryService
         return $inquiry->load(['client.user', 'property.agent']);
     }
 
-    // agent/admin updates inquiry status
     public function update(int $id, array $data): Inquiry
     {
         $inquiry = Inquiry::findOrFail($id);
@@ -86,7 +78,6 @@ class InquiryService
         return $inquiry->fresh(['client.user', 'property.agent']);
     }
 
-    // admin deletes inquiry
     public function delete(int $id): void
     {
         Inquiry::findOrFail($id)->delete();
