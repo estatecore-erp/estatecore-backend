@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Client;
+use App\Models\Lease;
 use App\Models\Property;
+use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 
@@ -18,9 +21,9 @@ class PropertyService
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('location', 'like', "%{$search}%");
+                    ->orWhere('location', 'like', "%{$search}%");
             });
         }
 
@@ -61,12 +64,12 @@ class PropertyService
             $file = $data['image'];
             $extension = $file->getClientOriginalExtension();
             $fileName = $property->id . '.' . $extension;
-            
+
             $destinationPath = public_path('storage/properties');
             if (!file_exists($destinationPath)) {
                 mkdir($destinationPath, 0777, true);
             }
-            
+
             $file->move($destinationPath, $fileName);
             $property->update(['image_path' => '/storage/properties/' . $fileName]);
         }
@@ -82,12 +85,12 @@ class PropertyService
             $file = $data['image'];
             $extension = $file->getClientOriginalExtension();
             $fileName = $property->id . '.' . $extension;
-            
+
             $destinationPath = public_path('storage/properties');
             if (!file_exists($destinationPath)) {
                 mkdir($destinationPath, 0777, true);
             }
-            
+
             $file->move($destinationPath, $fileName);
             $data['image_path'] = '/storage/properties/' . $fileName;
             unset($data['image']);
@@ -100,5 +103,29 @@ class PropertyService
     public function deleteProperty(int $id): void
     {
         Property::findOrFail($id)->delete();
+    }
+
+    public function getClientPortfolio(User $authUser)
+    {
+        $client = Client::query()->where('user_id', $authUser->id)->firstOrFail();
+
+        $soldPropertyIds = Sale::query()->where('client_id', $client->id)->pluck('property_id');
+        $leasedPropertyIds = Lease::query()->where('client_id', $client->id)->pluck('property_id');
+
+        $properties = Property::with('agent')
+            ->where(function ($query) use ($soldPropertyIds, $leasedPropertyIds) {
+                $query->whereIn('id', $soldPropertyIds)
+                    ->orWhereIn('id', $leasedPropertyIds);
+            })
+            ->latest()
+            ->get();
+
+        // Attach a virtual "ownership_type" attribute to each property
+        return $properties->map(function (Property $property) use ($soldPropertyIds) {
+            $property->ownership_type = $soldPropertyIds->contains($property->id)
+                ? 'owned'
+                : 'rented';
+            return $property;
+        });
     }
 }

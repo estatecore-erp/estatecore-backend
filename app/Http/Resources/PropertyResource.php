@@ -18,6 +18,7 @@ class PropertyResource extends JsonResource
             'price' => $this->price,
             'location' => $this->location,
             'image_path' => $this->image_path,
+            'ownership_type' => $this->when(isset($this->ownership_type), $this->ownership_type),
             'agent' => new UserResource($this->whenLoaded('agent')),
             'inquiries'   => $this->whenLoaded('inquiries', function () {
                 return $this->inquiries->map(fn($inquiry) => [

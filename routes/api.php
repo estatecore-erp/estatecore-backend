@@ -37,6 +37,7 @@ Route::prefix('/v1')->group(function () {
         // properties
         Route::prefix('properties')->controller(PropertyController::class)->group(function () {
             Route::get('/', 'index');
+            Route::get('/portfolio', 'portfolio')->middleware('role:client');
             Route::post('/', 'store')->middleware('role:admin,agent');
             Route::get('/{id}', 'show');
             Route::put('/{id}', 'update');

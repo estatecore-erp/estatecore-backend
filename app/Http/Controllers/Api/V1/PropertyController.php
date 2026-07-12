@@ -91,4 +91,14 @@ class PropertyController extends Controller
             'Property deleted successfully'
         );
     }
+
+    public function portfolio(Request $request)
+    {
+        $properties = $this->propertyService->getClientPortfolio($request->user());
+
+        return ApiResponse::success(
+            PropertyResource::collection($properties),
+            'Portfolio retrieved successfully'
+        );
+    }
 }
