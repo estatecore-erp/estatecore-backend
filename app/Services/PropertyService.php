@@ -37,7 +37,10 @@ class PropertyService
 
     public function getById(int $id)
     {
-        return Property::with('agent')->findOrFail($id);
+        return Property::with([
+            'agent',
+            'inquiries.client.user'
+        ])->findOrFail($id);
     }
 
     public function storeProperty(array $data, User $authUser)
